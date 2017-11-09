@@ -1,11 +1,21 @@
 import psycopg2 as pg
 
-def main():
-    """ """
-    db = connect_to_db(host='localhost', dbname='tonicwater', user='postgres', password='password')
 
-    all_reviews = select_all_reviews(db)
-    print(all_reviews.fetchone())
+def insert_review(db, author_name, review, rating):
+    """ Insert an author review and rating into the DB. """
+    cursor = db.cursor()
+    try:
+        cursor.execute("""
+            insert into author_review (review_author, review, rating)
+            values (%s, %s, %s)
+        """, (author_name, review, rating))
+    except:
+        db.rollback()
+        return False
+
+    cursor.close()
+    db.commit()
+    return True
 
 def select_all_reviews(db):
     """ create a cursor for all reviews in the DB """
@@ -37,6 +47,3 @@ def connect_to_db(host, dbname, user, password):
         return db
     except:
         print('Unable to connect to DB')
-
-if __name__ == "__main__":
-    main()
