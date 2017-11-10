@@ -1,7 +1,7 @@
 import db as db
 
 def main():
-    """ """
+    """ Main Function """
     conn = db.connect_to_db(host='localhost', dbname='tonicwater', user='postgres', password='password')
 
     all_reviews = db.select_all_reviews(conn)
