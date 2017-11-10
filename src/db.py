@@ -1,6 +1,5 @@
 import psycopg2 as pg
 
-
 def insert_review(db, author_name, review, rating):
     """ Insert an author review and rating into the DB. """
     cursor = db.cursor()
@@ -10,7 +9,7 @@ def insert_review(db, author_name, review, rating):
             values (%s, %s, %s)
         """, (author_name, review, rating))
     except:
-        db.rollback()
+        db.rollback() 
         return False
 
     cursor.close()
@@ -29,11 +28,10 @@ def select_reviewer_reviews(db, reviewer_name):
     cursor = db.cursor()
 
     cursor.execute(""" 
-        select * from reviews where review_auther = %s
+        select * from author_review where review_author = %s
     """, [reviewer_name])
 
     return cursor
-
 
 def connect_to_db(host, dbname, user, password):
     """ Connect to Database returning pyscopg2 cursor object """

@@ -11,7 +11,7 @@ def init_stopwords():
         STOP_WORDS[lang] = set(stopwords.words(lang)[0:50])
 
 def valid_rating(rating):
-    return (rating >= 0 and rating <= 10)
+    return (rating > -1 and rating < 11)
 
 # Adapted from http://blog.alejandronolla.com/2013/05/15/detecting-text-language-with-python-and-nltk/
 def is_english(review):
@@ -33,7 +33,7 @@ def main():
 
     all_reviews = db.select_all_reviews(conn)
 
-    rev = all_reviews.fetchone()
+    print('Checking Reviews Now...')
     for rev in all_reviews:
         author = rev[5]
         review = rev[9]
@@ -41,7 +41,8 @@ def main():
 
         if valid_rating(rating) and is_english(review):
             res = db.insert_review(conn, author, review, rating)
-    
+            if not res:
+                print('Record not inserted.')
 
     #if res:
     #    print('WIN!')
