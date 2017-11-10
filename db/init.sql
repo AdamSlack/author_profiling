@@ -55,11 +55,15 @@ create materialized view review_counts as
 -- Table of filtered reviews.
 ---------------------------------------------------------------------------
 create table author_review(
-    id              serial  not null,
+    id              serial  not null primary key,
     review_author   text    not null,
     review          text    not null,
     rating          int     not null
 );
 
+create table words(
+    word        text    not null primary key,
+    doc_count   int     not null
+);
 
 commit;

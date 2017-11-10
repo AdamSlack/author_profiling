@@ -16,11 +16,41 @@ def insert_review(db, author_name, review, rating):
     db.commit()
     return True
 
+def select_all_authors(db):
+    """ create a cursor for all author names in the DB """
+    cursor = db.cursor()
+
+    cursor.execute('select review_author from author_review')
+    return cursor
+
+def insert_word(db, word):
+    """ Insert an word into the DB. """
+    cursor = db.cursor()
+    try:
+        cursor.execute("""
+            select count(*) from words where word = %s
+        """, (word))
+
+        res = cursor.fetchone()
+        print(res)
+
+        cursor.execute("""
+            insert into words (word)
+            values (%s)
+        """, (word))
+    except:
+        db.rollback() 
+        return False
+
+    cursor.close()
+    db.commit()
+    return True
+
 def select_all_reviews(db):
     """ create a cursor for all reviews in the DB """
     cursor = db.cursor()
 
-    cursor.execute('select * from reviews')
+    cursor.execute('select * from author_review')
     return cursor
 
 def select_reviewer_reviews(db, reviewer_name):
