@@ -26,7 +26,7 @@ def is_english(review):
     return (max_lang == 'english' and lang_occur['english'] > 0)
 
 def main():
-    """ """
+    """ Main Function """
     init_stopwords()
 
     conn = db.connect_to_db(host='localhost', dbname='tonicwater', user='postgres', password='password')
