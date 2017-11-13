@@ -10,7 +10,9 @@ def consume_review(rev):
     tokens = word_tokenize(rev)
 
     for t in tokens:
-        GLOBAL_WORDS[str(t).upper()] += 1
+        for split in t.split('.')
+            # if split contains punc....
+            GLOBAL_WORDS[str(t).upper()] += 1
 
 
 def main():
