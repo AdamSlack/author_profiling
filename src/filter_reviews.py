@@ -50,6 +50,8 @@ def main():
     #    print('FAIL')
     #print(one[5] + '\n\n' + one[9] + '\n\n' + str(one[10]))
 
+def alt_main():
+    is_english('This is an English text. It\'s made up of English words.')
 
 if __name__ == "__main__":
-    main()
+    alt_main()
