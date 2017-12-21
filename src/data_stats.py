@@ -1,6 +1,14 @@
 from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk import pos_tag
+from nltk.data import load
 from functools import reduce
 import string
+from json import dumps
+from itertools import product
+
+def upenn_tags():
+    tag_dict = load('help/tagsets/upenn_tagset.pickle')
+    return list(tag_dict.keys())
 
 def tokenize(review : str):
     """ tokenizes a review string into sents and words """
@@ -33,11 +41,60 @@ def average_sentence_length(tokenized_review : 'list of list of str'):
 
 def average_word_length(tokenized_review : 'list of list of str'):
     """ counts the average length of words in a tokenized review"""
+    n = count_words(tokenized_review)
+    total = count_word_characters(tokenized_review)
+    return total/n
 
 def process_review(review : str):
     """ derive numerical variables from a given review string """
     tokenized_review = tokenize(review)
     sent_count = count_sentences(tokenized_review)
+
+def pos_tag_review(tokenized_review : 'list of list of str'):
+    """ perform pos tagggin on each sentence in a review """
+    return [pos_tag(sent) for sent in tokenized_review]
+
+def count_unigrams(tokenized_review : 'list of list of str'):
+    """ count the unigrams present in each sentence of a review"""
+    tag_set = upenn_tags()
+    unigram_counts = {tag: 0 for tag in tag_set}
+    tagged_review = pos_tag_review(tokenized_review)
+    for sent in tagged_review:
+        for word in sent:
+            unigram_counts[word[1]] += 1
+    return unigram_counts
+
+def count_bigrams(tokenized_review : 'list of list of str'):
+    tag_set = upenn_tags()
+    bigram_counts = {format_bigram_key(tag[0], tag[1]): 0 for tag in product(tag_set,repeat=2)}
+    tagged_review = pos_tag_review(tokenized_review)
+
+    for sent in tagged_review:
+        for idx in range(0, len(sent)-2):
+            x = sent[idx][1]
+            y = sent[idx + 1][1]
+            bigram_counts[format_bigram_key(x, y)] += 1
+
+    return bigram_counts
+
+def format_bigram_key(first : str, second : str):
+    return r'{}/{}'.format(first, second)
+
+def format_trigram_key(first : str, second : str, third : str):
+    return r'{}/{}/{}'.format(first, second, third)
+
+def count_trigrams(tokenized_review : 'list of list of str'):
+    tag_set = upenn_tags()
+    trigram_counts = {format_trigram_key(tag[0], tag[1], tag[2]) : 0 for tag in product(tag_set,repeat=3)}
+    tagged_review = pos_tag_review(tokenized_review)
+
+    for sent in tagged_review:
+        for idx in range(0, len(sent)-3):
+            x = sent[idx][1]
+            y = sent[idx + 1][1]
+            z = sent[idx + 2][1]
+            trigram_counts[format_trigram_key(x,y,z)] += 1   
+    return trigram_counts
 
 def main():
     """ main program flow. """
@@ -49,6 +106,9 @@ def main():
     avg_sent_len = average_sentence_length(tokenized_review)
     char_count = count_word_characters(tokenized_review)
     avg_word_len = average_word_length(tokenized_review)
+    unigram_counts = count_unigrams(tokenized_review)
+    bigram_counts = count_bigrams(tokenized_review)
+    trigram_counts = count_trigrams(tokenized_review)
 
     print(review)
     print('Tokens: ')
@@ -57,6 +117,10 @@ def main():
     print('Sent Count:', str(sent_count))
     print('Average Sentence Length:', str(avg_sent_len))
     print('Character Count:', str(char_count))
+    print('Average Word Length:', str(avg_word_len))
+    print(dumps(unigram_counts,indent=2))
+    print(dumps(bigram_counts,indent=2))
+    print(dumps(trigram_counts, indent=2))
 
 if __name__ == '__main__':
     main()
