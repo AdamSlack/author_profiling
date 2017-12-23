@@ -111,16 +111,18 @@ create table review_emo_counts(
     trust           int         not null
 );
 
-create table review_data(
+create table processed_reviews(
     id              serial      not null references author_review(id),
+    tokens          jsonb       not null,
     word_count      int         not null,
     avg_word_length float       not null,
     sent_count      int         not null,
     avg_sent_length float       not null,
-    unigram_counts  float       not null,
-    bigram_counts   float       not null,
-    trigram_counts  float       not null,
-    emo_counts      serial      references review_emo_counts()
+    unigram_counts  jsonb       not null,
+    bigram_counts   jsonb       not null,
+    trigram_counts  jsonb       not null,
+    emotive_counts  jsonb       not null,
+    sentiment_score float       not null
 );
 
 commit;
