@@ -4,8 +4,9 @@ from json import dumps
 
 class ProcessedReview:
     
-    def __init__(self, word_count, sent_count, avg_sent_len, avg_word_len, unigram_counts, bigram_counts, trigram_counts, emotive_counts, sentiment_score):
+    def __init__(self, tokens, word_count, sent_count, avg_sent_len, avg_word_len, unigram_counts, bigram_counts, trigram_counts, emotive_counts, sentiment_score):
         """ Class constructor """
+        self.tokens = tokens
         self.word_count = word_count
         self.sent_count = sent_count
         self.avg_sent_len = avg_sent_len
@@ -17,12 +18,28 @@ class ProcessedReview:
         self.sentiment_score = sentiment_score
     
     def __str__(self):
-        return 'Word Count: ' + str(self.word_count) + '\n' + \
+        return 'Tokens: ' + dumps(self.tokens) + '\n' + \
+               'Word Count: ' + str(self.word_count) + '\n' + \
                'Average Word Length: ' + str(self.avg_word_len) + '\n' + \
                'Sentence Count: ' + str(self.sent_count) + '\n' \
                'Average Sentence Length: ' + str(self.avg_sent_len) + '\n' + \
                'Emotive Counts:\n' + dumps(self.emotive_counts, indent=2) + '\n' + \
                'Sentiment Score: ' + str(self.sentiment_score) + '\n'
+
+    def db_tuple(self, id):
+        return (
+            id,
+            dumps(self.tokens),
+            self.word_count,
+            self.sent_count,
+            self.avg_sent_len,
+            self.avg_word_len,
+            dumps(self.unigram_counts),
+            dumps(self.bigram_counts),
+            dumps(self.trigram_counts),
+            dumps(self.emotive_counts),
+            self.sentiment_score
+        )
     
 
 def process_review(review_string):
@@ -43,7 +60,7 @@ def process_review(review_string):
     review_emotive_counts = emotive_scores(tokenized_review, emo_lex)
     review_sentiment_score = sentiment_score(tokenized_review, emotive_scores=review_emotive_counts)
 
-    return ProcessedReview(word_count, sent_count, avg_sent_len, avg_word_len, unigram_counts, bigram_counts, trigram_counts, review_emotive_counts, review_sentiment_score)
+    return ProcessedReview(tokenized_review, word_count, sent_count, avg_sent_len, avg_word_len, unigram_counts, bigram_counts, trigram_counts, review_emotive_counts, review_sentiment_score)
 
 
 def main():
@@ -64,13 +81,12 @@ def main():
     #        print('Failed to insert review.')
     #        break
 
-    print('Processig Reviews')
+    print('Processing Reviews')
     for review in select_all_reviews(db):
         review_id = review[0]
         review_string = review[2]
         processed_review = process_review(review_string)
-        print(processed_review)
-
+        insert_processed_review(db, processed_review.db_tuple(review_id))
 
 if __name__ == '__main__':
     main()

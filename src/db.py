@@ -63,8 +63,44 @@ def select_reviewer_reviews(db, reviewer_name):
 
     return 
 
-def insert_processed_review(db, review):
+def insert_processed_review(db, review_tuple):
     """ Insert the derived numerical variables of a review."""
+    cursor = db.cursor()
+    try:
+        cursor.execute("""
+            insert into processed_reviews (
+                id, 
+                tokens, 
+                word_count, 
+                avg_word_length, 
+                sent_count, 
+                avg_sent_length, 
+                unigram_counts, 
+                bigram_counts, 
+                trigram_counts, 
+                emotive_counts, 
+                sentiment_score
+            ) values (
+                %s
+                %s
+                %s
+                %s
+                %s
+                %s
+                %s
+                %s
+                %s
+                %s
+                %s
+            )    
+        """, review_tuple)
+    except:
+        db.rollback() 
+        return False
+
+    cursor.close()
+    db.commit()
+    return True        
 
 def connect_to_db(host, dbname, user, password):
     """ Connect to Database returning pyscopg2 cursor object """
