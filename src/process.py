@@ -1,9 +1,10 @@
 from data_stats import *
 from db import *
+from json import dumps
 
 class ProcessedReview:
     
-    def __init__(self, word_count, sent_count, avg_sent_len, avg_word_len, unigram_counts, bigram_counts, emotive_counts, sentiment_score):
+    def __init__(self, word_count, sent_count, avg_sent_len, avg_word_len, unigram_counts, bigram_counts, trigram_counts, emotive_counts, sentiment_score):
         """ Class constructor """
         self.word_count = word_count
         self.sent_count = sent_count
@@ -14,7 +15,15 @@ class ProcessedReview:
         self.trigram_counts = trigram_counts
         self.emotive_counts = emotive_counts
         self.sentiment_score = sentiment_score
-
+    
+    def __str__(self):
+        return 'Word Count: ' + str(self.word_count) + '\n' + \
+               'Average Word Length: ' + str(self.avg_word_len) + '\n' + \
+               'Sentence Count: ' + str(self.sent_count) + '\n' \
+               'Average Sentence Length: ' + str(self.avg_sent_len) + '\n' + \
+               'Emotie Counts:\n' +_dumps(self.emotive_counts, indent=2) + '\n' + \
+               'Sentiment Score: ' + str(self.sentiment_score) + '\n'
+    
 
 def process_review(review_string):
     """ process a review, deriving numerical variables from the string. """
@@ -34,6 +43,8 @@ def process_review(review_string):
     review_emotive_counts = emotive_scores(tokenized_review, emo_lex)
     review_sentiment_score = sentiment_score(tokenized_review, emotive_scores=review_emotive_counts)
 
+    return ProcessedReview(word_count, sent_count, avg_sent_len, avg_word_len, unigram_counts, bigram_counts, trigram_counts, review_emotive_counts, review_sentiment_score)
+
 
 def main():
     """ Main Program Execution. """
@@ -45,13 +56,19 @@ def main():
         'This book was okay, it is short enough that you can tolerate some of its quirks. If it was anylonger, then those same quirks would have driven me insane. Average book, Average characters, Average.'
         ]
 
-    db = connect_to_db(host='localhost',dbname='tonicwater',user='postgre',password='password')
+    db = connect_to_db(host='localhost',dbname='tonicwater',user='postgres',password='password')
 
+    print('Inserting Review')
     for rev, idx in enumerate(test_reviews):
-        insert_review(db, idx, idx)
+        insert_review(db=db, author_name=idx, review=rev, rating=idx)
 
+    print('Processig Reviews')
     for review in select_all_reviews(db):
-        
+        review_id = review[0]
+        review_string = review[2]
+        processed_review = process_review(review_string)
+        print(processed_review)
+
 
 if __name__ == '__main__':
     main()
