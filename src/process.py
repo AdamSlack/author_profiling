@@ -21,13 +21,13 @@ class ProcessedReview:
                'Average Word Length: ' + str(self.avg_word_len) + '\n' + \
                'Sentence Count: ' + str(self.sent_count) + '\n' \
                'Average Sentence Length: ' + str(self.avg_sent_len) + '\n' + \
-               'Emotie Counts:\n' +_dumps(self.emotive_counts, indent=2) + '\n' + \
+               'Emotive Counts:\n' + dumps(self.emotive_counts, indent=2) + '\n' + \
                'Sentiment Score: ' + str(self.sentiment_score) + '\n'
     
 
 def process_review(review_string):
     """ process a review, deriving numerical variables from the string. """
-    tokenized_review = tokenize(review)
+    tokenized_review = tokenize(review_string)
     
     word_count = count_words(tokenized_review)
     sent_count = count_sentences(tokenized_review)
@@ -58,9 +58,11 @@ def main():
 
     db = connect_to_db(host='localhost',dbname='tonicwater',user='postgres',password='password')
 
-    print('Inserting Review')
-    for rev, idx in enumerate(test_reviews):
-        insert_review(db=db, author_name=idx, review=rev, rating=idx)
+    #print('Inserting Review')
+    #for idx, rev in enumerate(test_reviews):
+    #    if not insert_review(db=db, author_name=str(idx), review=rev, rating=idx):
+    #        print('Failed to insert review.')
+    #        break
 
     print('Processig Reviews')
     for review in select_all_reviews(db):
