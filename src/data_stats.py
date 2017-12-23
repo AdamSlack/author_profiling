@@ -178,9 +178,9 @@ def main():
     emo_lex = parse_emo_lex()
     review_emotive_counts = emotive_scores(tokenized_review, emo_lex)
     review_sentiment_score = sentiment_score(tokenized_review, emotive_scores=review_emotive_counts)
-    print(emo_lex_emotions(emo_lex))
-    print(dumps(review_emotive_counts,indent=2))
-    print('Sentiment Score: ' + str(review_sentiment_score))
+    #print(emo_lex_emotions(emo_lex))
+    #print(dumps(review_emotive_counts,indent=2))
+    #print('Sentiment Score: ' + str(review_sentiment_score))
 
 
 if __name__ == '__main__':

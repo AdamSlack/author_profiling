@@ -61,7 +61,9 @@ def select_reviewer_reviews(db, reviewer_name):
         select * from author_review where review_author = %s
     """, [reviewer_name])
 
-    return cursor
+    return 
+
+def insert_processed_review(db, review)
 
 def connect_to_db(host, dbname, user, password):
     """ Connect to Database returning pyscopg2 cursor object """
@@ -75,3 +77,5 @@ def connect_to_db(host, dbname, user, password):
         return db
     except:
         print('Unable to connect to DB')
+
+
