@@ -164,7 +164,7 @@ def main():
     #print('Sent Count:', str(sent_count))
     #print('Average Sentence Length:', str(avg_sent_len))
     #print('Character Count:', str(char_count))
-    #print('Average Word Length:', str(avg_word_len))
+    #print('Average Word Length:', str(avg_word_len))3
 
     # POS Tag Stats
     #unigram_counts = count_unigrams(tokenized_review)
