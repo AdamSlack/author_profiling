@@ -42,6 +42,54 @@ class ProcessedReview:
             self.sentiment_score
         )
     
+    def dict_components(self, review_dict):
+        labels = list(review_dict.keys())
+        values = [review_dict[key] for key in labels]
+
+        return labels, values
+
+    def label_array_tsv_string(self, arr):
+        s = arr[0]
+        for v in range (1, len(arr)-1):
+            s += '\t' + arr[v]
+
+        return s
+    
+    def value_array_tsv_string(self, arr):
+        s = str(arr[0])
+        for v in range (1, len(arr)-1):
+            s += '\t' + str(arr[v])
+        return s
+
+    def to_tsv(self, id, author_name):
+        unigram_labels, unigram_values = self.dict_components(self.unigram_counts)
+        bigram_labels, bigram_values = self.dict_components(self.bigram_counts)
+        trigram_labels, trigram_values = self.dict_components(self.trigram_counts)
+        emotive_labels, emotive_values = self.dict_components(self.emotive_counts)
+
+        labels = 'id\tname\tword_count\tsent_count\tavg_sent_len\tavg_word_len\t'
+        labels += self.label_array_tsv_string(unigram_labels) + '\t'
+        labels += self.label_array_tsv_string(bigram_labels) + '\t'
+        labels += self.label_array_tsv_string(trigram_labels) + '\t'
+        labels += self.label_array_tsv_string(emotive_labels) + '\t'
+
+        labels += 'sentiment_score'
+
+        values = str(id) + '\t' + str(author_name) + '\t' + str(self.word_count) + '\t' + str(self.sent_count) + '\t' + str(self.avg_sent_len)  + '\t' + str(self.avg_word_len) + '\t'
+
+        values += self.value_array_tsv_string(unigram_values) + '\t'
+        values += self.value_array_tsv_string(bigram_values) + '\t'
+        values += self.value_array_tsv_string(trigram_values) + '\t'
+        values += self.value_array_tsv_string(emotive_values) + '\t'       
+        return labels, values        
+
+    def value_array(self):
+        unigram_labels, unigram_values = self.dict_components(self.unigram_counts)
+        bigram_labels, bigram_values = self.dict_components(self.bigram_counts)
+        trigram_labels, trigram_values = self.dict_components(self.trigram_counts)
+        emotive_labels, emotive_values = self.dict_components(self.emotive_counts)
+    
+
 
 def process_review(review_string):
     """ process a review, deriving numerical variables from the string. """
@@ -76,12 +124,13 @@ def main():
 
     db = connect_to_db(host='localhost',dbname='tonicwater',user='postgres',password='password')
 
-    print('Inserting Review')
-    for idx, rev in enumerate(test_reviews):
-        if not insert_review(db=db, author_name=str(idx), review=rev, rating=idx):
-            print('Failed to insert review.')
-            break
-
+    #print('Inserting Review')
+    #for idx, rev in enumerate(test_reviews):
+    #    if not insert_review(db=db, author_name=str(idx), review=rev, rating=idx):
+    #        print('Failed to insert review.')
+    #        break
+    values = []
+    labels = ''
     print('Processing Reviews')
     for review in select_all_reviews(db):
         review_id = review[0]
@@ -89,6 +138,13 @@ def main():
         review_string = review[2]
         processed_review = process_review(review_string)
         insert_processed_review(db, processed_review.db_tuple(review_id, author_name))
+        l,v = processed_review.to_tsv(review_id, author_name)
+        labels = l
+        values.append(v)
 
+    with open('foo.tsv', 'w') as f:
+        f.write(labels + '\n')
+        for line in values:
+            f.write(line + '\n')
 if __name__ == '__main__':
     main()
