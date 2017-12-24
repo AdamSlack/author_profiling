@@ -29,7 +29,7 @@ class ProcessedReview:
     def db_tuple(self, id):
         return (
             id,
-            dumps(self.tokens),
+            dumps({'tokens':self.tokens}),
             self.word_count,
             self.sent_count,
             self.avg_sent_len,
@@ -75,11 +75,11 @@ def main():
 
     db = connect_to_db(host='localhost',dbname='tonicwater',user='postgres',password='password')
 
-    #print('Inserting Review')
-    #for idx, rev in enumerate(test_reviews):
-    #    if not insert_review(db=db, author_name=str(idx), review=rev, rating=idx):
-    #        print('Failed to insert review.')
-    #        break
+    print('Inserting Review')
+    for idx, rev in enumerate(test_reviews):
+        if not insert_review(db=db, author_name=str(idx), review=rev, rating=idx):
+            print('Failed to insert review.')
+            break
 
     print('Processing Reviews')
     for review in select_all_reviews(db):

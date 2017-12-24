@@ -81,16 +81,16 @@ def insert_processed_review(db, review_tuple):
             emotive_counts, 
             sentiment_score
         ) values (
-            %s
-            %s
-            %s
-            %s
-            %s
-            %s
-            %s
-            %s
-            %s
-            %s
+            %s,
+            %s,
+            %s,
+            %s,
+            %s,
+            %s,
+            %s,
+            %s,
+            %s,
+            %s,
             %s
         )    
     """, review_tuple)
