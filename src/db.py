@@ -70,7 +70,7 @@ def insert_processed_review(db, review_tuple):
     cursor.execute("""
         insert into processed_reviews (
             id, 
-            author_name,
+            review_author,
             tokens, 
             word_count, 
             avg_word_length, 
