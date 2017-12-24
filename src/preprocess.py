@@ -30,7 +30,7 @@ class ProcessedReview:
         return (
             id,
             author_name,
-            dumps({'tokens':self.tokens}),
+            dumps(self.tokens),
             self.word_count,
             self.sent_count,
             self.avg_sent_len,

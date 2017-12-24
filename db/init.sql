@@ -98,7 +98,6 @@ create table emolex(
 
 create table review_emo_counts(
     id              serial      not null references author_review(id),
-    review_author   text        not null references author_review(review_author),
     emo_id          serial      not null,
     anger           int         not null,
     anticipation    int         not null,
@@ -114,6 +113,7 @@ create table review_emo_counts(
 
 create table processed_reviews(
     id              serial      not null references author_review(id),
+    review_author   text        not null references author_review(review_author),
     tokens          jsonb       not null,
     word_count      int         not null,
     avg_word_length float       not null,
