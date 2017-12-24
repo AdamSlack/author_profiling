@@ -26,9 +26,10 @@ class ProcessedReview:
                'Emotive Counts:\n' + dumps(self.emotive_counts, indent=2) + '\n' + \
                'Sentiment Score: ' + str(self.sentiment_score) + '\n'
 
-    def db_tuple(self, id):
+    def db_tuple(self, id, author_name):
         return (
             id,
+            author_name,
             dumps({'tokens':self.tokens}),
             self.word_count,
             self.sent_count,
@@ -84,9 +85,10 @@ def main():
     print('Processing Reviews')
     for review in select_all_reviews(db):
         review_id = review[0]
+        author_name = review[1]
         review_string = review[2]
         processed_review = process_review(review_string)
-        insert_processed_review(db, processed_review.db_tuple(review_id))
+        insert_processed_review(db, processed_review.db_tuple(review_id, author_name))
 
 if __name__ == '__main__':
     main()
