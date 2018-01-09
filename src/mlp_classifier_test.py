@@ -1,8 +1,16 @@
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import normalize 
+
+
 import numpy as np
 
 from preprocess import *
+
+def class_indexes(processed_reviews):
+    """ Given an array of ProcessedReview objects, create an enum of the author names """
+
+
+
 
 def main():
     """ Main Process Flow """    
