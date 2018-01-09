@@ -1,6 +1,7 @@
 from data_stats import *
 from db import *
 from json import dumps
+import numpy as np
 
 class ProcessedReview:
     
@@ -41,7 +42,23 @@ class ProcessedReview:
             dumps(self.emotive_counts),
             self.sentiment_score
         )
+
+    def data(self):
+        data = [
+            self.word_count,
+                self.sent_count,
+                self.avg_sent_len,
+                self.avg_word_len,
+                self.sentiment_score
+        ]
+
+        uni = list(self.unigram_counts.values())
+        bi  = list(self.bigram_counts.values())
+        tri = list(self.trigram_counts.values())
+        emo = list(self.emotive_counts.values())
     
+        return data + uni + bi + emo
+
     def dict_components(self, review_dict):
         labels = list(review_dict.keys())
         values = [review_dict[key] for key in labels]
@@ -111,6 +128,9 @@ def process_review(review_string):
 
     return ProcessedReview(tokenized_review, word_count, sent_count, avg_sent_len, avg_word_len, unigram_counts, bigram_counts, trigram_counts, review_emotive_counts, review_sentiment_score)
 
+def process_reviews(reviews):
+    """ given an array of reviews, return array of derived data """
+    return [process_review(review) for review in reviews]
 
 def main():
     """ Main Program Execution. """
