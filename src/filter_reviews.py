@@ -1,4 +1,4 @@
-import db
+import db as db
 from nltk.corpus import stopwords
 from nltk import wordpunct_tokenize
 from collections import defaultdict
