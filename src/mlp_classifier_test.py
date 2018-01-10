@@ -8,7 +8,8 @@ from preprocess import *
 
 def class_indexes(processed_reviews):
     """ Given an array of ProcessedReview objects, create an enum of the author names """
-
+    authors = set([rev.author for rev in processed_reviews])
+    
 
 
 
