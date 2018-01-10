@@ -66,4 +66,64 @@ create table words(
     doc_count   int     not null
 );
 
+---------------------------------------------------------------------------
+-- Processed Review Data
+---------------------------------------------------------------------------
+
+
+create table emotions(
+    id      serial      not null,
+    emotion text        not null primary key
+);
+
+
+create table emolex(
+    id              serial      not null,
+    word            text        not null
+    anger           boolean     not null,
+    anticipation    boolean     not null,
+    disgust         boolean     not null,
+    fear            boolean     not null,
+    joy             boolean     not null,
+    negative        boolean     not null,
+    positive        boolean     not null,
+    sadness         boolean     not null,
+    surprise        boolean     not null,
+    trust           boolean     not null    
+);
+
+---------------------------------------------------------------------------
+-- Processed Review Data
+---------------------------------------------------------------------------
+
+create table review_emo_counts(
+    id              serial      not null references author_review(id),
+    emo_id          serial      not null,
+    anger           int         not null,
+    anticipation    int         not null,
+    disgust         int         not null,
+    fear            int         not null,
+    joy             int         not null,
+    negative        int         not null,
+    positive        int         not null,
+    sadness         int         not null,
+    surprise        int         not null,
+    trust           int         not null
+);
+
+create table processed_reviews(
+    id              serial      not null references author_review(id),
+    review_author   text        not null,
+    tokens          jsonb       not null,
+    word_count      int         not null,
+    avg_word_length float       not null,
+    sent_count      int         not null,
+    avg_sent_length float       not null,
+    unigram_counts  jsonb       not null,
+    bigram_counts   jsonb       not null,
+    trigram_counts  jsonb       not null,
+    emotive_counts  jsonb       not null,
+    sentiment_score float       not null
+);
+
 commit;
