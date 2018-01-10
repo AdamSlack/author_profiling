@@ -27,7 +27,6 @@ def emo_lex_emotions(emo_lex = None):
 
     return list(emo_lex[list(emo_lex.keys())[0]].keys())
     
-
 def upenn_tags():
     tag_dict = load('help/tagsets/upenn_tagset.pickle')
     return list(tag_dict.keys())
