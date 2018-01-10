@@ -33,8 +33,14 @@ def main():
 
     all_reviews = db.select_all_reviews(conn)
 
-    print('Checking Reviews Now...')
+    print('Checking Reviews Now... ')
+    count = 0
     for rev in all_reviews:
+        if len(rev) < 10:
+            print('Invalid Review Object from DB.')
+            print('Contains', len(rev), 'Elements')
+            print(rev)
+            break;
         author = rev[5]
         review = rev[9]
         rating = rev[10]
@@ -43,6 +49,9 @@ def main():
             res = db.insert_review(conn, author, review, rating)
             if not res:
                 print('Record not inserted.')
+            elif count % 100 == 0 :
+                print('Record inserted. Count:', count)
+            count += 1
 
     #if res:
     #    print('WIN!')
@@ -54,4 +63,4 @@ def alt_main():
     is_english('This is an English text. It\'s made up of English words.')
 
 if __name__ == "__main__":
-    alt_main()
+    main()

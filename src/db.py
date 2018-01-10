@@ -50,7 +50,15 @@ def select_all_reviews(db):
     """ create a cursor for all reviews in the DB """
     cursor = db.cursor()
 
-    cursor.execute('select * from author_review')
+    cursor.execute('select * from reviews')
+    return cursor
+
+def select_all_filtered_reviews(db):
+    """ create a cursor for all filtered reviews in the DB """
+
+    cursor = db.cursor()
+
+    cursor.execute('select * from author_reviews')
     return cursor
 
 def select_reviewer_reviews(db, reviewer_name):

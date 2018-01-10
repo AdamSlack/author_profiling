@@ -5,13 +5,30 @@ from sklearn.preprocessing import normalize
 import numpy as np
 
 from preprocess import *
+from db import *
 
-def class_indexes(processed_reviews):
+def enumerate_authors(processed_reviews):
     """ Given an array of ProcessedReview objects, create an enum of the author names """
-    authors = set([rev.author for rev in processed_reviews])
+    return enumerate(list(set([rev.author for rev in processed_reviews])))
+
+def retrieve_review_data():
+    """ fetch reviews from database and create array of authors and array of reviews. """
+    conn = connect_to_db('localhost', 'tonicwater', 'postgres', 'password')
+    revs = select_all_filtered_reviews(db)
+
+    reviews = []
+    authors = []
     
+    for rev in revs:
+        authors.append(rev[1])
+        reviews.append(rev[2])    
 
+    return authors, reviews
 
+def map_author_index(authors, author_enum):
+    """ given an array of author strings, find the enum value for it """
+
+    return [author_enum[auth] for auth in authors]
 
 def main():
     """ Main Process Flow """    
