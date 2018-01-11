@@ -53,6 +53,14 @@ def select_all_reviews(db):
     cursor.execute('select * from reviews')
     return cursor
 
+def select_filtered_reviews(db, batch_size, offset):
+    """ select filtered reviews, limiting amount and offsetting """#
+    print('Selecting Filtered Reviews. Batch:', batch_size, 'Offset:', offset)
+    cursor = db.cursor()
+
+    cursor.execute('select * from author_review limit %s offset %s', (batch_size, offset))
+    return cursor
+
 def select_all_filtered_reviews(db):
     """ create a cursor for all filtered reviews in the DB """
 

@@ -29,7 +29,9 @@ def emo_lex_emotions(emo_lex = None):
     
 def upenn_tags():
     tag_dict = load('help/tagsets/upenn_tagset.pickle')
-    return list(tag_dict.keys())
+    tags = list(tag_dict.keys())
+    with_hash = tags.append('#')
+    return tags
 
 def tokenize(review : str):
     """ tokenizes a review string into sents and words """
@@ -141,6 +143,9 @@ def sentiment_score(tokenized_review : 'list of list of str', emo_lex=None, emot
     pos = emotive_scores['positive']
     neg = emotive_scores['negative']
 
+    if pos == 0 and neg == 0:
+        return 0
+
     return (pos - neg) / (pos + neg)
 
 def main():
@@ -163,7 +168,7 @@ def main():
     #print('Sent Count:', str(sent_count))
     #print('Average Sentence Length:', str(avg_sent_len))
     #print('Character Count:', str(char_count))
-    #print('Average Word Length:', str(avg_word_len))3
+    #print('Average Word Length:', str(av.append('#')g_word_len))3
 
     # POS Tag Stats
     #unigram_counts = count_unigrams(tokenized_review)

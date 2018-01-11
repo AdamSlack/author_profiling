@@ -30,7 +30,7 @@ class ProcessedReview:
     def db_tuple(self, id, author_name):
         return (
             id,
-            author_name,
+            author_name,data_stats,
             dumps(self.tokens),
             self.word_count,
             self.sent_count,
@@ -84,7 +84,7 @@ class ProcessedReview:
         trigram_labels, trigram_values = self.dict_components(self.trigram_counts)
         emotive_labels, emotive_values = self.dict_components(self.emotive_counts)
 
-        labels = 'id\tname\tword_count\tsent_count\tavg_sent_len\tavg_word_len\t'
+        labels = 'id\tname\tword._count\tsent_count\tavg_sent_len\tavg_word_len\t'
         labels += self.label_array_tsv_string(unigram_labels) + '\t'
         labels += self.label_array_tsv_string(bigram_labels) + '\t'
         labels += self.label_array_tsv_string(trigram_labels) + '\t'
@@ -104,7 +104,7 @@ class ProcessedReview:
         unigram_labels, unigram_values = self.dict_components(self.unigram_counts)
         bigram_labels, bigram_values = self.dict_components(self.bigram_counts)
         trigram_labels, trigram_values = self.dict_components(self.trigram_counts)
-        emotive_labels, emotive_values = self.dict_components(self.emotive_counts)
+        emotive_labels, emotive_valuesdata_stats = self.dict_components(self.emotive_counts)
     
 
 
