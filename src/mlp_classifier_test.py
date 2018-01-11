@@ -7,14 +7,19 @@ import numpy as np
 from preprocess import *
 from db import *
 
-def enumerate_authors(processed_reviews):
-    """ Given an array of ProcessedReview objects, create an enum of the author names """
-    return enumerate(list(set([rev.author for rev in processed_reviews])))
+def enumerate_review_authors(processed_reviews):
+    """ Given an array of ProcessedReview objects, create an dict of the author names and idx """
+
+    return {auth: idx for idx, auth in enumerate(list(set([rev.author for rev in processed_reviews])))}
+
+def enumerate_class_options(classifications):
+    """ given an array of possible classifications, return an enum for each possivle class """
+    return {c: idx for idx, c in enumerate(list(set([c for c in classifications])))}
 
 def retrieve_review_data():
     """ fetch reviews from database and create array of authors and array of reviews. """
     conn = connect_to_db('localhost', 'tonicwater', 'postgres', 'password')
-    revs = select_all_filtered_reviews(db)
+    revs = select_all_filtered_reviews(conn)
 
     reviews = []
     authors = []
@@ -42,10 +47,18 @@ def main():
         ]
 
     authors = ['Adam', 'Adam', 'Adam', 'Rachael', 'Rachael', 'Rachael']
-    author_ids = [0,0,0,1,1,1]
     data = np.array([d.data() for d in process_reviews(reviews)])
 
-    print(data.shape)
+    authors, reviews = retrieve_review_data()
+
+    subset_auth = authors[:50000]
+    subset_reviews = np.array(reviews[:50000])
+
+    auth_enum = enumerate_class_options(subset_auth)
+    training_auth = map_author_index(subset_auth, auth_enum)
+
+    print(training_auth)
+    print(subset_reviews.shape)
 
     norm_data = normalize(data, 'l2')
 

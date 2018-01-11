@@ -58,7 +58,7 @@ def select_all_filtered_reviews(db):
 
     cursor = db.cursor()
 
-    cursor.execute('select * from author_reviews')
+    cursor.execute('select * from author_review')
     return cursor
 
 def select_reviewer_reviews(db, reviewer_name):
