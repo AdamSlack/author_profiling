@@ -128,6 +128,39 @@ def train_mlp(test_set_pct = 10):
             for s in test_results:
                 f.write('%s, ' % s)
             f.write('\n\n\n')
+
+        tp = 0
+        fp = 0
+        tn = 0
+        fn = 0
+        for i in range(0, len(test_results)):
+            pre = test_results[i]
+            act = test_classes[i]
+
+            if act == 1:
+                # Positive
+                if act == pre:
+                    # True Positive, correct prediction
+                    tp += 1
+                else:
+                    # False Negative, incorrect prediction
+                    fn += 1
+            else:
+                # negative
+                if act == pre:
+                    # True Negative, correct prediction
+                    tn += 1
+                else:
+                    # False Positive, incorrect prediction
+                    fp += 1
+
+        precision = tp / (tp + fp)
+        recall = tp / (tp + fn)
+
+        with open('results.csv', 'a') as f:
+            f.write('%s, %s, %s, %s, %s, %s\n' % (tp, fp, tn, fn, precision, recall))
+
+
         
         now_time = time.clock()
         print('Training Complete for: ', author)
