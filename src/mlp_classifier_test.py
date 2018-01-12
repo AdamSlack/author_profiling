@@ -158,10 +158,8 @@ def train_mlp(test_set_pct = 10):
         recall = tp / (tp + fn)
 
         with open('results.csv', 'a') as f:
-            f.write('%s, %s, %s, %s, %s, %s\n' % (tp, fp, tn, fn, precision, recall))
+            f.write('%s, %s, %s, %s, %s, %s, %s\n' % (author_review_count*2, tp, fp, tn, fn, precision, recall))
 
-
-        
         now_time = time.clock()
         print('Training Complete for: ', author)
         print('Total Time Taken for', author, ': ', now_time - start_time)
