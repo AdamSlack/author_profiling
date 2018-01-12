@@ -69,6 +69,8 @@ def train_mlp(test_set_pct = 10):
     conn = connect_to_db('localhost', 'tonicwater', 'postgres', 'password')
 
     authors = select_capped_authors(conn)
+    already_done = ['jen.e.moore','JennyArch','jamespurcell','LynnB','cameling','PopcornReads','MHanover10','DLMorrese','tjsjohanna','mahallett','moonshineandrosefire','Heather19','TequilaReader']
+    authors = [author for author in authors if author not in already_done]
     author_count = len(authors)
     print('Total Authors:', author_count)
     current_author_num = 0
@@ -133,6 +135,7 @@ def train_mlp(test_set_pct = 10):
         fp = 0
         tn = 0
         fn = 0
+
         for i in range(0, len(test_results)):
             pre = test_results[i]
             act = test_classes[i]
@@ -154,8 +157,12 @@ def train_mlp(test_set_pct = 10):
                     # False Positive, incorrect prediction
                     fp += 1
 
-        precision = tp / (tp + fp)
-        recall = tp / (tp + fn)
+        if tp == 0:
+            precision = 0
+            recall = 0
+        else:   
+            precision = tp / (tp + fp)
+            recall = tp / (tp + fn)
 
         with open('results.csv', 'a') as f:
             f.write('%s, %s, %s, %s, %s, %s, %s\n' % (author_review_count*2, tp, fp, tn, fn, precision, recall))
