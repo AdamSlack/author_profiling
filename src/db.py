@@ -96,8 +96,8 @@ def select_capped_author(db, author):
 
     cursor.execute("""
         select * from capped_reviews
-            where review_author = author
-    """)
+            where review_author = %s
+    """, (author,))
 
     return cursor
 

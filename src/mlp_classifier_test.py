@@ -74,7 +74,7 @@ def train_mlp(test_set_pct = 10):
         author_reviews = [process_review(res[1]).data() for res in select_capped_author(conn, author)]
         author_review_count = len(author_reviews)
         
-        other_reviews = [process_reviewres[1]).data() for res in select_random_capped_reviews(conn, author_review_count, exclude=author)]
+        other_reviews = [process_review(res[1]).data() for res in select_random_capped_reviews(conn, author_review_count, exclude=author)]
         
         print('Reviews selected for:', author, '. Author Count:', author_review_count, ' Other Count:', len(other_reviews))
 
@@ -86,47 +86,66 @@ def train_mlp(test_set_pct = 10):
 
         shuffled_reviews, shuffled_classes = shuffle(norm_reviews, review_classes)
 
-        test_set_size = int(author_review_count * (test_set_pct/100)) # halved as some comes from author and some from other
+        test_set_size = int(author_review_count * (test_set_pct/50)) # div 50 as author rev count is half of total
 
+        training_reviews = shuffled_reviews[0 : len(shuffled_reviews) - test_set_size]
+        training_classes = shuffled_classes[0 : len(shuffled_classes) - test_set_size]
 
+        test_reviews = shuffled_reviews[len(shuffled_reviews) - test_set_size : ]
+        test_classes = shuffled_classes[len(shuffled_classes) - test_set_size : ]
 
+        clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+        clf.fit(training_reviews, training_classes)
+
+        test_results = clf.predict(test_reviews)
+
+        with open('results.txt', 'a') as f:
+            f.write('Results for: ' + author + '\n\n')
+            f.write('Actual: ')
+            f.write(test_classes)
+            f.write('\n')
+            f.write('Predicted: ')
+            f.write(test_results)
+            f.write('\n\n\n')
 
 
 def main():
     """ Main Process Flow """    
 
-    print(calc_min_max())
-    authors, reviews = retrieve_review_data(100, 0)
+
+    train_mlp()
+    # print(calc_min_max())
+    # authors, reviews = retrieve_review_data(100, 0)
         
-    norm_reviews = normalize(reviews, 'l2')
+    # norm_reviews = normalize(reviews, 'l2')
 
-    print(len(authors), len(reviews))
+    # print(len(authors), len(reviews))
 
-    reviews_c = deepcopy(norm_reviews.tolist())
-    del reviews_c[10]
-    del reviews_c[15]
+    # reviews_c = deepcopy(norm_reviews.tolist())
+    # del reviews_c[10]
+    # del reviews_c[15]
 
-    training_reviews = np.array(reviews_c)
+    # training_reviews = np.array(reviews_c)
 
-    auth_c = deepcopy(authors)
-    del auth_c[10]
-    del auth_c[15]
+    # auth_c = deepcopy(authors)
+    # del auth_c[10]
+    # del auth_c[15]
 
-    auth_enum = enumerate_class_options(authors)
-    training_auth = map_author_index(auth_c, auth_enum)
+    # auth_enum = enumerate_class_options(authors)
+    # training_auth = map_author_index(auth_c, auth_enum)
 
-    print(training_auth)
-    print(training_reviews.shape)
+    # print(training_auth)
+    # print(training_reviews.shape)
 
 
-    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
-    clf.fit(training_reviews, training_auth)
+    # clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+    # clf.fit(training_reviews, training_auth)
 
-    print('Actual:', map_author_index([authors[10],authors[15]], auth_enum))
+    # print('Actual:', map_author_index([authors[10],authors[15]], auth_enum))
 
-    test_data = np.array([norm_reviews[10], norm_reviews[15]])
-    res = clf.predict(test_data)
-    print('Predicted:', res)
+    # test_data = np.array([norm_reviews[10], norm_reviews[15]])
+    # res = clf.predict(test_data)
+    # print('Predicted:', res)
 
 
 if __name__ == '__main__':
