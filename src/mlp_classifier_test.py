@@ -80,7 +80,7 @@ def train_mlp(test_set_pct = 10):
         start_time = time.clock()
         author_reviews = [process_review(res[1]).data() for res in select_capped_author(conn, author)]
         now_time = time.clock()
-        print('Author Sample created in:', start_time - now_time)
+        print('Author Sample created in:', now_time - start_time)
         
         author_review_count = len(author_reviews)
         
@@ -88,8 +88,8 @@ def train_mlp(test_set_pct = 10):
         before_time = time.clock()
         other_reviews = [process_review(res[1]).data() for res in select_random_capped_reviews(conn, author_review_count, exclude=author)]
         now_time = time.clock()
-        print('Other Sample created in: ', before_time - now_time)
-        print('Total Time Taken: ', start_time - now_time)
+        print('Other Sample created in: ', now_time - before_time)
+        print('Total Time Taken: ', now_time - start_time)
         print('Reviews selected for:', author, '. Author Count:', author_review_count, ' Other Count:', len(other_reviews))
 
         reviews = author_reviews + other_reviews
@@ -110,11 +110,11 @@ def train_mlp(test_set_pct = 10):
 
         clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
 
-        before_time = start_time()
+        before_time = time.clock()
         clf.fit(training_reviews, training_classes)
         now_time = time.clock()
-        print('Model Training Completed in: ', before_time - now_time)
-        print('Total Time Taken:: ', start_time - now_time)
+        print('Model Training Completed in: ',  now_time - before_time)
+        print('Total Time Taken:: ', now_time - start_time)
 
         test_results = clf.predict(test_reviews)
 
@@ -129,8 +129,9 @@ def train_mlp(test_set_pct = 10):
                 f.write('%s, ' % s)
             f.write('\n\n\n')
         
+        now_time = time.clock()
         print('Training Complete for: ', author)
-        print('Total Time Taken for', author, ': ', start_time - now_time)
+        print('Total Time Taken for', author, ': ', now_time - start_time)
 
 
 
