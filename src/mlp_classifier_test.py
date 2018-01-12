@@ -1,6 +1,8 @@
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import normalize 
 from sklearn.utils import shuffle
+import time
+
 import numpy as np
 from copy import deepcopy
 
@@ -67,15 +69,27 @@ def train_mlp(test_set_pct = 10):
     conn = connect_to_db('localhost', 'tonicwater', 'postgres', 'password')
 
     authors = select_capped_authors(conn)
-    
+    author_count = len(authors)
+    print('Total Authors:', author_count)
+    current_author_num = 0
     for author in authors:
+        current_author_num += 1
+        print('Author number: ', current_author_num, ' / ', author_count)
         print('Creating Sample for:', author)
 
+        start_time = time.clock()
         author_reviews = [process_review(res[1]).data() for res in select_capped_author(conn, author)]
+        now_time = time.clock()
+        print('Author Sample created in:', start_time - now_time)
+        
         author_review_count = len(author_reviews)
         
+        print('Selecting random other reviews to sample with.')
+        before_time = time.clock()
         other_reviews = [process_review(res[1]).data() for res in select_random_capped_reviews(conn, author_review_count, exclude=author)]
-        
+        now_time = time.clock()
+        print('Other Sample created in: ', before_time - now_time)
+        print('Total Time Taken: ', start_time - now_time)
         print('Reviews selected for:', author, '. Author Count:', author_review_count, ' Other Count:', len(other_reviews))
 
         reviews = author_reviews + other_reviews
@@ -95,18 +109,29 @@ def train_mlp(test_set_pct = 10):
         test_classes = shuffled_classes[len(shuffled_classes) - test_set_size : ]
 
         clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+
+        before_time = start_time()
         clf.fit(training_reviews, training_classes)
+        now_time = time.clock()
+        print('Model Training Completed in: ', before_time - now_time)
+        print('Total Time Taken:: ', start_time - now_time)
 
         test_results = clf.predict(test_reviews)
 
         with open('results.txt', 'a') as f:
             f.write('Results for: ' + author + '\n\n')
             f.write('Actual: ')
-            f.write(test_classes)
+            for s in test_classes:
+                f.write('%s, ' % s)
             f.write('\n')
             f.write('Predicted: ')
-            f.write(test_results)
+            for s in test_results:
+                f.write('%s, ' % s)
             f.write('\n\n\n')
+        
+        print('Training Complete for: ', author)
+        print('Total Time Taken for', author, ': ', start_time - now_time)
+
 
 
 def main():
