@@ -53,12 +53,62 @@ def select_all_reviews(db):
     cursor.execute('select * from reviews')
     return cursor
 
+def select_capped_count(db):
+    """ """
+    cursor = db.cursor()
+
+    cursor.execute("""
+        select count(*) from capped_reviews
+     """)
+    
+    return [res for res in cursor]
+
+def select_capped_authors(db):
+    """ """
+    cursor = db.cursor()
+
+    cursor.execute("""
+        select distinct review_author from capped_reviews
+    """)
+
+    return [auth[0] for auth in cursor]
+
+def select_random_capped_reviews(db, amount, exclude):
+    """ Select random reviews that don't match a certain name"""
+
+    cursor = db.cursor()
+
+    cursor.execute("""
+        select * from capped_reviews
+            where review_author != %s
+            order by random()
+            limit %s
+    """,
+    (exclude, amount))
+
+    return cursor
+
+
+def select_capped_author(db, author):
+    """ select reviews of an author with more reviews than the cap """
+
+    cursor = db.cursor()
+
+    cursor.execute("""
+        select * from capped_reviews
+            where review_author = author
+    """)
+
+    return cursor
+
 def select_filtered_reviews(db, batch_size, offset):
-    """ select filtered reviews, limiting amount and offsetting """#
+    """ select filtered reviews, limiting amount and offsetting """
     print('Selecting Filtered Reviews. Batch:', batch_size, 'Offset:', offset)
     cursor = db.cursor()
 
-    cursor.execute('select * from author_review limit %s offset %s', (batch_size, offset))
+    cursor.execute("""
+    select * from capped_reviews limit %s offset %s
+    """, (batch_size, offset))
     return cursor
 
 def select_all_filtered_reviews(db):
@@ -77,7 +127,7 @@ def select_reviewer_reviews(db, reviewer_name):
         select * from author_review where review_author = %s
     """, [reviewer_name])
 
-    return 
+    return cursor
 
 def insert_processed_review(db, review_tuple):
     """ Insert the derived numerical variables of a review."""

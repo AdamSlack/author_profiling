@@ -30,7 +30,7 @@ class ProcessedReview:
     def db_tuple(self, id, author_name):
         return (
             id,
-            author_name,data_stats,
+            author_name,
             dumps(self.tokens),
             self.word_count,
             self.sent_count,
@@ -42,6 +42,20 @@ class ProcessedReview:
             dumps(self.emotive_counts),
             self.sentiment_score
         )
+
+    def data_columns(self):
+        cols = [
+            'word_count' ,
+            'sent_count',
+            'avg_sent_len',
+            'avg_word_len',
+            'sentiment_score'
+        ]
+        uni = list(self.unigram_counts.keys())
+        bi = list(self.bigram_counts.keys())
+        emo = list(self.emotive_counts.keys())
+
+        return cols + uni + bi + emo
 
     def data(self):
         data = [
@@ -142,29 +156,34 @@ def main():
         'This book was okay, it is short enough that you can tolerate some of its quirks. If it was anylonger, then those same quirks would have driven me insane. Average book, Average characters, Average.'
         ]
 
-    db = connect_to_db(host='localhost',dbname='tonicwater',user='postgres',password='password')
+    #db = connect_to_db(host='localhost',dbname='tonicwater',user='postgres',password='password')
 
-    #print('Inserting Review')
-    #for idx, rev in enumerate(test_reviews):
+    # print('Inserting Review')
+    # for idx, rev in enumerate(test_reviews):
     #    if not insert_review(db=db, author_name=str(idx), review=rev, rating=idx):
     #        print('Failed to insert review.')
     #        break
-    values = []
-    labels = ''
-    print('Processing Reviews')
-    for review in select_all_reviews(db):
-        review_id = review[0]
-        author_name = review[1]
-        review_string = review[2]
-        processed_review = process_review(review_string)
-        insert_processed_review(db, processed_review.db_tuple(review_id, author_name))
-        l,v = processed_review.to_tsv(review_id, author_name)
-        labels = l
-        values.append(v)
 
-    with open('foo.tsv', 'w') as f:
-        f.write(labels + '\n')
-        for line in values:
-            f.write(line + '\n')
+    
+    proc = process_review(test_reviews[0])
+    print(proc.data_columns())
+
+    # values = []
+    # labels = ''
+    # print('Processing Reviews')
+    # for review in select_all_reviews(db):
+    #     review_id = review[0]
+    #     author_name = review[1]
+    #     review_string = review[2]
+    #     processed_review = process_review(review_string)
+    #     insert_processed_review(db, processed_review.db_tuple(review_id, author_name))
+    #     l,v = processed_review.to_tsv(review_id, author_name)
+    #     labels = l
+    #     values.append(v)
+
+    # with open('foo.tsv', 'w') as f:
+    #     f.write(labels + '\n')
+    #     for line in values:
+    #         f.write(line + '\n')
 if __name__ == '__main__':
     main()

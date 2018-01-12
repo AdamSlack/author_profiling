@@ -1,6 +1,6 @@
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import normalize 
-
+from sklearn.utils import shuffle
 import numpy as np
 from copy import deepcopy
 
@@ -13,7 +13,8 @@ def enumerate_review_authors(processed_reviews):
     return {auth: idx for idx, auth in enumerate(list(set([rev.author for rev in processed_reviews])))}
 
 def enumerate_class_options(classifications):
-    """ given an array of possible classifications, return an enum for each possivle class """
+    """ given an array of pfrom sklearn.utils import shuffle
+ossible classifications, return an enum for each possivle class """
     return {c: idx for idx, c in enumerate(list(set([c for c in classifications])))}
 
 def retrieve_review_data(batch_size, offset):
@@ -25,8 +26,8 @@ def retrieve_review_data(batch_size, offset):
     authors = []
     
     for rev in revs:
-        authors.append(rev[1])
-        reviews.append(process_review(rev[2]).data())    
+        authors.append(rev[0])
+        reviews.append(process_review(rev[1]).data())    
 
     return authors, reviews
 
@@ -35,9 +36,66 @@ def map_author_index(authors, author_enum):
 
     return [author_enum[auth] for auth in authors]
 
+
+
+def calc_min_max():
+    total = 430246
+    steps = int(430246/500)
+    authors, reviews = retrieve_review_data(1, 0)
+
+    max_vals = reviews[0]
+    min_vals = reviews[0]
+
+
+    for i in range (0, steps):
+        authors, reviews = retrieve_review_data(500, 1 + (i*500))
+        for rev in reviews:
+            max_vals = [max(max_vals[idx], var) for idx, var in enumerate(rev)]
+            min_vals = [min(min_vals[idx], var) for idx, var in enumerate(rev)]
+
+    with open('max_vals.csv') as f:
+        f.writeline([str(v) + ', ' for v in max_vals])
+
+    with open('min_vals.csv') as f:
+        f.writeline([str(v) + ', ' for v in min_vals])
+    
+
+    return max_vals, min_vals    
+
+def train_mlp(test_set_pct = 10):
+    """ Train a MLP, using defined batch size and test set percentage size. """
+    conn = connect_to_db('localhost', 'tonicwater', 'postgres', 'password')
+
+    authors = select_capped_authors(conn)
+    
+    for author in authors:
+        print('Creating Sample for:', author)
+
+        author_reviews = [process_review(res[1]).data() for res in select_capped_author(conn, author)]
+        author_review_count = len(author_reviews)
+        
+        other_reviews = [process_reviewres[1]).data() for res in select_random_capped_reviews(conn, author_review_count, exclude=author)]
+        
+        print('Reviews selected for:', author, '. Author Count:', author_review_count, ' Other Count:', len(other_reviews))
+
+        reviews = author_reviews + other_reviews
+        review_classes = ([1]*author_review_count) + ([0]*author_review_count)
+
+        print('Normalising Reviews for:', author)
+        norm_reviews = normalize(reviews,'l2')
+
+        shuffled_reviews, shuffled_classes = shuffle(norm_reviews, review_classes)
+
+        test_set_size = int(author_review_count * (test_set_pct/100)) # halved as some comes from author and some from other
+
+
+
+
+
 def main():
     """ Main Process Flow """    
 
+    print(calc_min_max())
     authors, reviews = retrieve_review_data(100, 0)
         
     norm_reviews = normalize(reviews, 'l2')
