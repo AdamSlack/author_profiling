@@ -126,4 +126,14 @@ create table processed_reviews(
     sentiment_score float       not null
 );
 
+
+create table capped_reviews as
+    select author_review.review_author, review
+        from 
+            author_review,
+            (select review_author, count(*) from author_review group by review_author) as counts
+        where author_review.review_author = counts.review_author
+        and count > 500;
+
+
 commit;
