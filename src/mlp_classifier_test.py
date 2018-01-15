@@ -1,6 +1,11 @@
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import normalize 
 from sklearn.utils import shuffle
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+
+
 import time
 
 import numpy as np
@@ -71,6 +76,11 @@ def train_mlp(test_set_pct = 10):
     authors = select_capped_authors(conn)
     already_done = ['jen.e.moore','JennyArch','jamespurcell','LynnB','cameling','PopcornReads','MHanover10','DLMorrese','tjsjohanna','mahallett','moonshineandrosefire','Heather19','TequilaReader']
     authors = [author for author in authors if author not in already_done]
+    
+    # Test author
+    authors = ['reading_fox']
+
+
     author_count = len(authors)
     print('Total Authors:', author_count)
     current_author_num = 0
@@ -110,66 +120,77 @@ def train_mlp(test_set_pct = 10):
         test_reviews = shuffled_reviews[len(shuffled_reviews) - test_set_size : ]
         test_classes = shuffled_classes[len(shuffled_classes) - test_set_size : ]
 
-        clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
 
-        before_time = time.clock()
-        clf.fit(training_reviews, training_classes)
-        now_time = time.clock()
-        print('Model Training Completed in: ',  now_time - before_time)
-        print('Total Time Taken:: ', now_time - start_time)
+        # TEST CLASSIFIER
+        clfs = [
+            MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1, activation='relu'),
+            RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),    
+            GaussianNB(),
+            KNeighborsClassifier(2),
+        ]
 
-        test_results = clf.predict(test_reviews)
+        for clf in clfs:
+            before_time = time.clock()
+            clf.fit(training_reviews, training_classes)
+            now_time = time.clock()
+            print('Model Training Completed in: ',  now_time - before_time)
+            print('Total Time Taken:: ', now_time - start_time)
 
-        with open('results.txt', 'a') as f:
-            f.write('Results for: ' + author + '\n\n')
-            f.write('Actual: ')
-            for s in test_classes:
-                f.write('%s, ' % s)
-            f.write('\n')
-            f.write('Predicted: ')
-            for s in test_results:
-                f.write('%s, ' % s)
+            test_results = clf.predict(test_reviews)
+
+            with open('compare_results.txt', 'a') as f:
+                f.write('Results for: ' + author + '\n\n')
+                f.write('Actual: ')
+                for s in test_classes:
+                    f.write('%s, ' % s)
+                f.write('\n')
+                f.write('Predicted: ')
+                for s in test_results:
+                    f.write('%s, ' % s)
+                f.write('\n\n\n')
+
+            tp = 0
+            fp = 0
+            tn = 0
+            fn = 0
+
+            for i in range(0, len(test_results)):
+                pre = test_results[i]
+                act = test_classes[i]
+
+                if act == 1:
+                    # Positive
+                    if act == pre:
+                        # True Positive, correct prediction
+                        tp += 1
+                    else:
+                        # False Negative, incorrect prediction
+                        fn += 1
+                else:
+                    # negative
+                    if act == pre:
+                        # True Negative, correct prediction
+                        tn += 1
+                    else:
+                        # False Positive, incorrect prediction
+                        fp += 1
+
+            if tp == 0:
+                precision = 0
+                recall = 0
+            else:   
+                precision = tp / (tp + fp)
+                recall = tp / (tp + fn)
+
+            with open('compare_results.csv', 'a') as f:
+                f.write('%s, %s, %s, %s, %s, %s, %s\n' % (author_review_count*2, tp, fp, tn, fn, precision, recall))
+
+            now_time = time.clock()
+            print('Training Complete for: ', author)
+            print('Total Time Taken for', author, ': ', now_time - start_time)
+
+        with open('compare_results.csv', 'a') as f:
             f.write('\n\n\n')
-
-        tp = 0
-        fp = 0
-        tn = 0
-        fn = 0
-
-        for i in range(0, len(test_results)):
-            pre = test_results[i]
-            act = test_classes[i]
-
-            if act == 1:
-                # Positive
-                if act == pre:
-                    # True Positive, correct prediction
-                    tp += 1
-                else:
-                    # False Negative, incorrect prediction
-                    fn += 1
-            else:
-                # negative
-                if act == pre:
-                    # True Negative, correct prediction
-                    tn += 1
-                else:
-                    # False Positive, incorrect prediction
-                    fp += 1
-
-        if tp == 0:
-            precision = 0
-            recall = 0
-        else:   
-            precision = tp / (tp + fp)
-            recall = tp / (tp + fn)
-
-        with open('results.csv', 'a') as f:
-            f.write('%s, %s, %s, %s, %s, %s, %s\n' % (author_review_count*2, tp, fp, tn, fn, precision, recall))
-
-        now_time = time.clock()
-        print('Training Complete for: ', author)
-        print('Total Time Taken for', author, ': ', now_time - start_time)
 
 
 
@@ -177,7 +198,8 @@ def main():
     """ Main Process Flow """    
 
 
-    train_mlp()
+    for i in range(0,100):
+        train_mlp()
     # print(calc_min_max())
     # authors, reviews = retrieve_review_data(100, 0)
         
