@@ -199,7 +199,7 @@ def train_mlp(test_set_pct = 10, ensemble=2):
 
     eval_ensemble(trained_models, author_samples, author_classes)
 
-def eval_ensemble(sample, classifications, models):
+def eval_ensemble(models, sample, classifications):
 
     shuff_sample, shuff_classes = shuffle(sample, classifications)
     
@@ -211,7 +211,7 @@ def eval_ensemble(sample, classifications, models):
         falses = 0
         correct = 0
         for idx, m in enumerate(models):
-            res = m.predict(s)
+            res = m.predict([s])
             if res == 0:
                 falses +=1
             else:
@@ -220,14 +220,14 @@ def eval_ensemble(sample, classifications, models):
                 if idx == shuff_classes[c]:
                     correct = 1
 
-        with open('ensemble_results_' + str(len(models)) + '.csv') as f:
-            f.write('%s, %s, %s' % (trues, falses, correct))
+        with open('ensemble_results' + str(len(models)) + '.csv', 'a') as f:
+            f.write('%s, %s, %s\n' % (trues, falses, correct))
     
-    with open('inter_agreement_' + str(len(models)) + '.csv') as f:
+    with open('inter_agreement' + str(len(models)) + '.csv', 'a') as f:
         f.write('%s' % len(classifications))
         for x in model_scores:
             f.write(', %s' % x)
-
+        f.write('\n')
 
 def main():
     """ Main Process Flow """    
