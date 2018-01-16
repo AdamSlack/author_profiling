@@ -78,19 +78,25 @@ def train_mlp(test_set_pct = 10):
     authors = [author for author in authors if author not in already_done]
     
     # Test author
-    authors = ['reading_fox']
-
+    authors = authors[0:5]
+    trained_models = []
+    author_samples = []
+    author_classes = []
 
     author_count = len(authors)
     print('Total Authors:', author_count)
     current_author_num = 0
-    for author in authors:
+    
+    for idx, author in enumerate(authors):
         current_author_num += 1
         print('Author number: ', current_author_num, ' / ', author_count)
         print('Creating Sample for:', author)
 
         start_time = time.clock()
         author_reviews = [process_review(res[1]).data() for res in select_capped_author(conn, author)]
+        author_samples.append(author_reviews)
+        author_classes.append([idx] * len(author_reviews))
+
         now_time = time.clock()
         print('Author Sample created in:', now_time - start_time)
         
@@ -124,9 +130,6 @@ def train_mlp(test_set_pct = 10):
         # TEST CLASSIFIER
         clfs = [
             MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1, activation='relu'),
-            RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),    
-            GaussianNB(),
-            KNeighborsClassifier(2),
         ]
 
         for clf in clfs:
@@ -182,16 +185,41 @@ def train_mlp(test_set_pct = 10):
                 precision = tp / (tp + fp)
                 recall = tp / (tp + fn)
 
-            with open('compare_results.csv', 'a') as f:
+            with open('bagging_results.csv', 'a') as f:
                 f.write('%s, %s, %s, %s, %s, %s, %s\n' % (author_review_count*2, tp, fp, tn, fn, precision, recall))
 
             now_time = time.clock()
             print('Training Complete for: ', author)
             print('Total Time Taken for', author, ': ', now_time - start_time)
 
-        with open('compare_results.csv', 'a') as f:
+            trained_models.append(clf)
+
+        with open('bagging_results.csv', 'a') as f:
             f.write('\n\n\n')
 
+        eval_ensemble(trained_models, author_samples, author_classes)
+
+def eval_ensemble(sample, classifications, models):
+
+    shuff_sample, shuff_classes = shuffle(sample, classifications)
+    
+    print('Evaluating Ensemble')
+
+    for c, s in enumerate(shuff_sample):
+        trues = 0
+        falses = 0
+        correct = 0
+        for idx, m in enumerate(models):
+            res = models.predict(s)
+            if res == 0:
+                falses +=1
+            else:
+                trues +=1 
+                if idx == shuff_classes[c]:
+                    correct = 1
+
+        with open('ensemble_results.csv') as f:
+            f.write('%s, %s, %s' % (trues, false, correct))
 
 
 def main():
