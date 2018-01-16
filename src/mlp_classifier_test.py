@@ -74,11 +74,11 @@ def train_mlp(test_set_pct = 10):
     conn = connect_to_db('localhost', 'tonicwater', 'postgres', 'password')
 
     authors = select_capped_authors(conn)
-    already_done = ['jen.e.moore','JennyArch','jamespurcell','LynnB','cameling','PopcornReads','MHanover10','DLMorrese','tjsjohanna','mahallett','moonshineandrosefire','Heather19','TequilaReader']
+    already_done = []#['jen.e.moore','JennyArch','jamespurcell','LynnB','cameling','PopcornReads','MHanover10','DLMorrese','tjsjohanna','mahallett','moonshineandrosefire','Heather19','TequilaReader']
     authors = [author for author in authors if author not in already_done]
     
     # Test author
-    authors = authors[0:5]
+    authors = authors[0:2]
     trained_models = []
     author_samples = []
     author_classes = []
@@ -94,8 +94,8 @@ def train_mlp(test_set_pct = 10):
 
         start_time = time.clock()
         author_reviews = [process_review(res[1]).data() for res in select_capped_author(conn, author)]
-        author_samples.append(author_reviews)
-        author_classes.append([idx] * len(author_reviews))
+        author_samples += author_reviews
+        author_classes += ([idx] * len(author_reviews))
 
         now_time = time.clock()
         print('Author Sample created in:', now_time - start_time)
@@ -129,7 +129,7 @@ def train_mlp(test_set_pct = 10):
 
         # TEST CLASSIFIER
         clfs = [
-            MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1, activation='relu'),
+            MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1, activation='relu')
         ]
 
         for clf in clfs:
@@ -197,29 +197,36 @@ def train_mlp(test_set_pct = 10):
         with open('bagging_results.csv', 'a') as f:
             f.write('\n\n\n')
 
-        eval_ensemble(trained_models, author_samples, author_classes)
+    eval_ensemble(trained_models, author_samples, author_classes)
 
 def eval_ensemble(sample, classifications, models):
 
     shuff_sample, shuff_classes = shuffle(sample, classifications)
     
     print('Evaluating Ensemble')
+    model_scores = [0] * 5
 
     for c, s in enumerate(shuff_sample):
         trues = 0
         falses = 0
         correct = 0
         for idx, m in enumerate(models):
-            res = models.predict(s)
+            res = m.predict(s)
             if res == 0:
                 falses +=1
             else:
                 trues +=1 
+                model_scores[idx] += 1
                 if idx == shuff_classes[c]:
                     correct = 1
 
         with open('ensemble_results.csv') as f:
             f.write('%s, %s, %s' % (trues, false, correct))
+    
+    with open('inter_agreement.csv') as f:
+        f.write('%s' % len(classifications))
+        for x in model_scores:
+            f.write(', %s' % x)
 
 
 def main():
