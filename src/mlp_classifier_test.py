@@ -69,7 +69,7 @@ def calc_min_max():
 
     return max_vals, min_vals    
 
-def train_mlp(test_set_pct = 10):
+def train_mlp(test_set_pct = 10, ensemble=2):
     """ Train a MLP, using defined batch size and test set percentage size. """
     conn = connect_to_db('localhost', 'tonicwater', 'postgres', 'password')
 
@@ -167,7 +167,7 @@ def train_mlp(test_set_pct = 10):
                         # True Positive, correct prediction
                         tp += 1
                     else:
-                        # False Negative, incorrect prediction
+                  ml      # False Negative, incorrect prediction
                         fn += 1
                 else:
                     # negative
@@ -220,10 +220,10 @@ def eval_ensemble(sample, classifications, models):
                 if idx == shuff_classes[c]:
                     correct = 1
 
-        with open('ensemble_results.csv') as f:
-            f.write('%s, %s, %s' % (trues, false, correct))
+        with open('ensemble_results_' + str(len(models)) + '.csv') as f:
+            f.write('%s, %s, %s' % (trues, falses, correct))
     
-    with open('inter_agreement.csv') as f:
+    with open('inter_agreement_' + str(len(models)) + '.csv') as f:
         f.write('%s' % len(classifications))
         for x in model_scores:
             f.write(', %s' % x)
@@ -233,8 +233,10 @@ def main():
     """ Main Process Flow """    
 
 
-    for i in range(0,100):
-        train_mlp()
+    train_mlp()
+    train_mlp(ensemble=5)
+    train_mlp(ensemble=10)
+    train_mlp(ensemble=20)
     # print(calc_min_max())
     # authors, reviews = retrieve_review_data(100, 0)
         
