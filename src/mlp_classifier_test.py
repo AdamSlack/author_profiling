@@ -78,7 +78,7 @@ def train_mlp(test_set_pct = 10, ensemble=2):
     authors = [author for author in authors if author not in already_done]
     
     # Test author
-    authors = authors[0:2]
+    authors = authors[0:ensemble]
     trained_models = []
     author_samples = []
     author_classes = []
@@ -167,7 +167,7 @@ def train_mlp(test_set_pct = 10, ensemble=2):
                         # True Positive, correct prediction
                         tp += 1
                     else:
-                  ml      # False Negative, incorrect prediction
+                        # False Negative, incorrect prediction
                         fn += 1
                 else:
                     # negative
@@ -204,7 +204,7 @@ def eval_ensemble(models, sample, classifications):
     shuff_sample, shuff_classes = shuffle(sample, classifications)
     
     print('Evaluating Ensemble')
-    model_scores = [0] * 5
+    model_scores = [0] * len(models)
 
     for c, s in enumerate(shuff_sample):
         trues = 0
@@ -231,7 +231,6 @@ def eval_ensemble(models, sample, classifications):
 
 def main():
     """ Main Process Flow """    
-
 
     train_mlp()
     train_mlp(ensemble=5)
