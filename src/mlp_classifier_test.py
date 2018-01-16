@@ -199,7 +199,7 @@ def train_mlp(test_set_pct = 10):
 
     eval_ensemble(trained_models, author_samples, author_classes)
 
-def eval_ensemble(sample, classifications, models):
+def eval_ensemble(models, sample, classifications):
 
     shuff_sample, shuff_classes = shuffle(sample, classifications)
     
